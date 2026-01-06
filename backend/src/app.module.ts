@@ -6,6 +6,7 @@ import { ContainersModule } from './containers/containers.module';
 import { ItemsModule } from './items/items.module';
 import { VisionModule } from './vision/vision.module';
 import { TeamsModule } from './teams/teams.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { TeamsModule } from './teams/teams.module';
     VisionModule,
     TeamsModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [],
 })
 export class AppModule {}
