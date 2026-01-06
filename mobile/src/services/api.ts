@@ -17,8 +17,8 @@ import {syncQueue} from './syncQueue';
 import {networkStatus} from './networkStatus';
 
 // Change this to your backend URL
-// Para iPhone fisico, usa la IP de tu Mac en la red local
-const API_URL = 'https://boxfinder-api.mefimports.com/api';
+// Render.com free tier (may take ~30s to wake up after inactivity)
+const API_URL = 'https://boxfinder-api.onrender.com/api';
 
 // Check if error is a network error
 function isNetworkError(error: any): boolean {
