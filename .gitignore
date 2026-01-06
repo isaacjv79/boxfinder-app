@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# iOS
+mobile/ios/Pods/
+mobile/ios/build/
+*.xcworkspace
+!mobile/ios/*.xcworkspace
+
+# Android
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/app/build/
+*.keystore
+!debug.keystore
+
+# React Native
+mobile/.expo/

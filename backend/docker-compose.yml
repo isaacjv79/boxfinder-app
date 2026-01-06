@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  boxfinder-api:
+    build: .
+    container_name: boxfinder-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3003:3000"
+    environment:
+      - DATABASE_URL=postgresql://boxfinder:boxfinder_secret_2024@boxfinder-db:5432/boxfinder?schema=public
+      - JWT_SECRET=boxfinder_jwt_secret_key_change_in_production_2024
+      - NODE_ENV=production
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      boxfinder-db:
+        condition: service_healthy
+    networks:
+      - boxfinder-network
+
+  boxfinder-db:
+    image: postgres:15-alpine
+    container_name: boxfinder-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=boxfinder
+      - POSTGRES_PASSWORD=boxfinder_secret_2024
+      - POSTGRES_DB=boxfinder
+    volumes:
+      - boxfinder-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boxfinder -d boxfinder"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - boxfinder-network
+
+volumes:
+  boxfinder-postgres-data:
+
+networks:
+  boxfinder-network:
+    driver: bridge

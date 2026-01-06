@@ -1,0 +1,104 @@
+// BoxFinder - Schema de base de datos
+// Sistema de inventario inteligente con IA
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  password    String
+  name        String
+  containers  Container[]
+  ownedTeams  Team[]       @relation("TeamOwner")
+  teamMembers TeamMember[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// Equipos para colaboración familiar/grupal
+model Team {
+  id        String       @id @default(uuid())
+  name      String
+  ownerId   String
+  owner     User         @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members   TeamMember[]
+  containers Container[] @relation("TeamContainers")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([ownerId])
+}
+
+model TeamMember {
+  id       String   @id @default(uuid())
+  teamId   String
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String   @default("member") // "admin", "member", "viewer"
+  joinedAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model Container {
+  id          String      @id @default(uuid())
+  name        String      // "Caja Navidad", "Ropa Invierno"
+  location    String      // "A1", "B3", etc.
+  row         Int         // Fila numerica (1, 2, 3...)
+  column      String      // Columna letra (A, B, C...)
+  description String?
+  qrCode      String      @unique @default(uuid()) // UUID para el QR
+  color       String?     // Color opcional para identificar visualmente
+  items       Item[]
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Organización jerárquica (contenedor padre/hijo)
+  parentId    String?
+  parent      Container?  @relation("ContainerHierarchy", fields: [parentId], references: [id])
+  children    Container[] @relation("ContainerHierarchy")
+  // Colaboración en equipo
+  teamId      String?
+  team        Team?       @relation("TeamContainers", fields: [teamId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([location])
+  @@index([parentId])
+  @@index([teamId])
+}
+
+model Item {
+  id           String    @id @default(uuid())
+  name         String    // Nombre identificado por IA o manual
+  description  String?   // Descripcion de IA
+  category     String?   // Categoria (ropa, decoracion, herramientas, etc.)
+  imageUrl     String    // URL de imagen en Cloudinary
+  thumbnailUrl String?   // URL de thumbnail
+  aiTags       String[]  // Tags generados por Claude Vision
+  aiConfidence Float?    // Nivel de confianza de la IA (0-1)
+  containerId  String
+  container    Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  // Rastreo de préstamos
+  isBorrowed   Boolean   @default(false)
+  borrowedTo   String?   // Nombre de la persona que tiene el artículo
+  borrowedAt   DateTime? // Fecha del préstamo
+  borrowedNote String?   // Nota opcional sobre el préstamo
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([containerId])
+  @@index([name])
+  @@index([category])
+  @@index([isBorrowed])
+}
