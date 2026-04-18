@@ -2,6 +2,7 @@ export {LoginScreen} from './LoginScreen';
 export {RegisterScreen} from './RegisterScreen';
 export {HomeScreen} from './HomeScreen';
 export {ContainerDetailScreen} from './ContainerDetailScreen';
+export {EditContainerScreen} from './EditContainerScreen';
 export {AddItemsScreen} from './AddItemsScreen';
 export {EditItemScreen} from './EditItemScreen';
 export {SearchScreen} from './SearchScreen';

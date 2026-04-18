@@ -104,6 +104,15 @@ class ApiService {
     await syncQueue.clearQueue();
   }
 
+  async deleteAccount(): Promise<{ message: string }> {
+    const response = await this.api.delete<{ message: string }>('/auth/delete-account');
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+    await offlineStorage.clearCache();
+    await syncQueue.clearQueue();
+    return response.data;
+  }
+
   async getProfile(): Promise<AuthResponse['user']> {
     const response = await this.api.get<AuthResponse['user']>('/auth/me');
     return response.data;

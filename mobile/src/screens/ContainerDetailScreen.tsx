@@ -151,6 +151,11 @@ export const ContainerDetailScreen: React.FC = () => {
           </Text>
         </View>
         <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => navigation.navigate('EditContainer', {container})}>
+          <Text style={styles.editButtonText}>Editar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.qrButton}
           onPress={() => setShowQR(!showQR)}>
           <Text style={styles.qrButtonText}>QR</Text>
@@ -290,6 +295,18 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 14,
     marginTop: 2,
+  },
+  editButton: {
+    backgroundColor: '#e94560',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
   },
   qrButton: {
     backgroundColor: '#0f3460',

@@ -16,7 +16,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const {user, logout} = useStore();
+  const {user, logout, deleteAccount} = useStore();
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -29,6 +30,46 @@ export const SettingsScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             await logout();
+          },
+        },
+      ],
+    );
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Eliminar Cuenta',
+      'Esta accion eliminara permanentemente tu cuenta y todos tus datos (contenedores, articulos, equipos). Esta accion no se puede deshacer.',
+      [
+        {text: 'Cancelar', style: 'cancel'},
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => {
+            // Second confirmation
+            Alert.alert(
+              'Confirmar Eliminacion',
+              'Escribe "ELIMINAR" mentalmente y confirma que deseas eliminar tu cuenta permanentemente.',
+              [
+                {text: 'Cancelar', style: 'cancel'},
+                {
+                  text: 'Si, Eliminar Mi Cuenta',
+                  style: 'destructive',
+                  onPress: async () => {
+                    setIsDeleting(true);
+                    try {
+                      await deleteAccount();
+                    } catch (error) {
+                      setIsDeleting(false);
+                      Alert.alert(
+                        'Error',
+                        'No se pudo eliminar la cuenta. Intenta de nuevo.',
+                      );
+                    }
+                  },
+                },
+              ],
+            );
           },
         },
       ],
@@ -123,6 +164,15 @@ export const SettingsScreen: React.FC = () => {
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Cerrar Sesion</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.deleteAccountButton}
+        onPress={handleDeleteAccount}
+        disabled={isDeleting}>
+        <Text style={styles.deleteAccountButtonText}>
+          {isDeleting ? 'Eliminando...' : 'Eliminar Cuenta'}
+        </Text>
       </TouchableOpacity>
 
       <View style={styles.bottomPadding} />
@@ -261,6 +311,19 @@ const styles = StyleSheet.create({
     color: '#e94560',
     fontSize: 16,
     fontWeight: '600',
+  },
+  deleteAccountButton: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  deleteAccountButtonText: {
+    color: '#888',
+    fontSize: 14,
+    fontWeight: '500',
   },
   bottomPadding: {
     height: 40,

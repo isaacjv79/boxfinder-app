@@ -22,6 +22,7 @@ export const LoginScreen: React.FC<Props> = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const login = useStore(state => state.login);
 
   const handleLogin = async () => {
@@ -31,16 +32,50 @@ export const LoginScreen: React.FC<Props> = ({navigation}) => {
     }
 
     setLoading(true);
-    try {
-      await login(email, password);
-    } catch (error: any) {
-      Alert.alert(
-        'Error',
-        error.response?.data?.message || 'Error al iniciar sesion',
-      );
-    } finally {
-      setLoading(false);
+    setLoadingMessage('Conectando...');
+
+    // Retry logic for cold start
+    const maxRetries = 3;
+    let lastError: any;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        if (attempt > 1) {
+          setLoadingMessage(`Reconectando... (intento ${attempt}/${maxRetries})`);
+        }
+        await login(email, password);
+        return; // Success - exit the function
+      } catch (error: any) {
+        lastError = error;
+
+        // If it's not a network/timeout error, don't retry
+        const isNetworkError =
+          !error.response ||
+          error.code === 'ECONNABORTED' ||
+          error.code === 'ERR_NETWORK' ||
+          error.message === 'Network Error';
+
+        if (!isNetworkError || attempt === maxRetries) {
+          break;
+        }
+
+        // Wait before retry
+        setLoadingMessage('El servidor esta iniciando, espera un momento...');
+        await new Promise<void>(resolve => setTimeout(resolve, 2000));
+      }
     }
+
+    // All retries failed
+    let errorMessage = 'Error al iniciar sesion. Por favor intenta de nuevo.';
+    if (lastError.response?.data?.message) {
+      errorMessage = lastError.response.data.message;
+    } else if (lastError.response?.status === 401) {
+      errorMessage = 'Email o contrasena incorrectos';
+    }
+
+    Alert.alert('Error', errorMessage);
+    setLoading(false);
+    setLoadingMessage('');
   };
 
   return (
@@ -77,7 +112,12 @@ export const LoginScreen: React.FC<Props> = ({navigation}) => {
             onPress={handleLogin}
             disabled={loading}>
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator color="#fff" />
+                {loadingMessage ? (
+                  <Text style={styles.loadingText}>{loadingMessage}</Text>
+                ) : null}
+              </View>
             ) : (
               <Text style={styles.buttonText}>Iniciar Sesion</Text>
             )}
@@ -140,6 +180,16 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.6,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 14,
   },
   buttonText: {
     color: '#fff',

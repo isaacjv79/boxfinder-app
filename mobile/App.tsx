@@ -9,6 +9,7 @@ import {
   RegisterScreen,
   HomeScreen,
   ContainerDetailScreen,
+  EditContainerScreen,
   AddItemsScreen,
   EditItemScreen,
   SearchScreen,
@@ -128,6 +129,7 @@ function App() {
             <>
               <Stack.Screen name="Main" component={MainTabs} />
               <Stack.Screen name="ContainerDetail" component={ContainerDetailScreen} />
+              <Stack.Screen name="EditContainer" component={EditContainerScreen} />
               <Stack.Screen name="AddItems" component={AddItemsScreen} />
               <Stack.Screen name="EditItem" component={EditItemScreen} />
               <Stack.Screen name="Search" component={SearchScreen} />

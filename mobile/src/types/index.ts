@@ -128,6 +128,7 @@ export type RootStackParamList = {
   Register: undefined;
   Main: undefined;
   ContainerDetail: { containerId: string };
+  EditContainer: { container: Container };
   AddItems: { containerId: string; qrCode: string };
   EditItem: { item: Item };
   BorrowedItems: undefined;

@@ -30,6 +30,7 @@ interface AppState {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 
   loadContainers: () => Promise<void>;
   addContainer: (
@@ -109,6 +110,18 @@ export const useStore = create<AppState>((set, get) => ({
 
   logout: async () => {
     await api.logout();
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      containers: [],
+      selectedContainer: null,
+      searchResults: [],
+    });
+  },
+
+  deleteAccount: async () => {
+    await api.deleteAccount();
     set({
       user: null,
       token: null,

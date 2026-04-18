@@ -87,6 +87,38 @@ export class AuthService {
     });
   }
 
+  async deleteAccount(userId: string): Promise<{ message: string }> {
+    // Delete all user data (cascading deletes handled by Prisma)
+    await this.prisma.$transaction(async (tx) => {
+      // Delete items in user's containers
+      await tx.item.deleteMany({
+        where: { container: { userId } },
+      });
+
+      // Delete user's containers
+      await tx.container.deleteMany({
+        where: { userId },
+      });
+
+      // Remove user from teams (as member)
+      await tx.teamMember.deleteMany({
+        where: { userId },
+      });
+
+      // Delete teams owned by user
+      await tx.team.deleteMany({
+        where: { ownerId: userId },
+      });
+
+      // Finally delete the user
+      await tx.user.delete({
+        where: { id: userId },
+      });
+    });
+
+    return { message: 'Account deleted successfully' };
+  }
+
   private generateToken(userId: string, email: string): string {
     return this.jwtService.sign({ sub: userId, email });
   }
